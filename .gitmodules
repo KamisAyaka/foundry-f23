@@ -31,3 +31,6 @@
 [submodule "ccip_rebase_token/lib/chainlink-local"]
 	path = ccip_rebase_token/lib/chainlink-local
 	url = https://github.com/smartcontractkit/chainlink-local
+[submodule "ccip_rebase_token/lib/ccip"]
+	path = ccip_rebase_token/lib/ccip
+	url = https://github.com/smartcontractkit/ccip
