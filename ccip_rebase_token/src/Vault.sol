@@ -23,7 +23,8 @@ contract Vault {
         // Deposit ETH into the vault
         // Mint tokens to the user
         // Emit a Deposit event
-        i_rebaseToken.mint(msg.sender, msg.value);
+        uint256 interestRate = i_rebaseToken.getInterestRate();
+        i_rebaseToken.mint(msg.sender, msg.value, interestRate);
         emit Deposit(msg.sender, msg.value);
     }
 
@@ -35,6 +36,9 @@ contract Vault {
         // Burn tokens from the user
         // Withdraw ETH from the vault
         // Emit a Redeem event
+        if (_amount == type(uint256).max) {
+            _amount = i_rebaseToken.balanceOf(msg.sender);
+        }
         i_rebaseToken.burn(msg.sender, _amount);
         (bool success, ) = payable(msg.sender).call{value: _amount}("");
         if (!success) {

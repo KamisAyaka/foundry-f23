@@ -28,3 +28,6 @@
 [submodule "ccip_rebase_token/lib/openzeppelin-contracts"]
 	path = ccip_rebase_token/lib/openzeppelin-contracts
 	url = https://github.com/openzeppelin/openzeppelin-contracts
+[submodule "ccip_rebase_token/lib/chainlink-local"]
+	path = ccip_rebase_token/lib/chainlink-local
+	url = https://github.com/smartcontractkit/chainlink-local
