@@ -8,9 +8,9 @@ import {AccessControl} from "@openzeppelin/contracts/access/AccessControl.sol";
 /**
  * @title RebaseToken
  * @author Firefly
- * @notice This is a cross-chain rebase token that incentivates users to deposit into a vault and gain interest in rewards.
- * @notice This interest rate in the smart contract can only decrease.
- * @notice Each user will have their own interest rate that is the global interest rate at the time they deposit.
+ * @notice 这是一个跨链复利代币，激励用户将资金存入金库并获得奖励利息。
+ * @notice 智能合约中的利率只能降低。
+ * @notice 每个地址将拥有他们在存入时的全局利率。
  */
 contract RebaseToken is ERC20, Ownable, AccessControl {
     error RebaseToken__InterestRateCanOnlyDecreased(
@@ -34,9 +34,9 @@ contract RebaseToken is ERC20, Ownable, AccessControl {
     }
 
     /**
-     * @notice Sets the interest rate for the token.
-     * @param _newInterestRate The new interest rate to set.
-     * @dev The interest rate can only decrease.
+     * @notice 设置代币的利率。
+     * @param _newInterestRate 要设置的新利率。
+     * @dev 利率只能降低。
      */
     function setInterestRate(uint256 _newInterestRate) external onlyOwner {
         if (_newInterestRate >= s_interestRate) {
@@ -50,18 +50,18 @@ contract RebaseToken is ERC20, Ownable, AccessControl {
     }
 
     /**
-     * @notice Get the principle balance of a user. This is the number of tokens that have currently been minted to the user, not including any interest accrued.
-     * @param _user The address of the user to check the principle balance for.
-     * @return The principle balance of the user.
+     * @notice 获取用户的本金余额。这是目前已被铸造给用户的代币数量，不包括任何累计的利息。
+     * @param _user 要检查本金余额的用户地址。
+     * @return 用户的本金余额。
      */
     function principleBalanceOf(address _user) external view returns (uint256) {
         return super.balanceOf(_user);
     }
 
     /**
-     * @notice Mints tokens to a user when they deposit into a vault.
-     * @param _to     The address of the user to mint tokens to.
-     * @param _amount  The amount of tokens to mint.
+     * @notice 当用户将资金存入金库时，向用户铸造代币。
+     * @param _to 要铸造代币的用户地址。
+     * @param _amount 要铸造的代币数量。
      */
     function mint(
         address _to,
@@ -74,9 +74,9 @@ contract RebaseToken is ERC20, Ownable, AccessControl {
     }
 
     /**
-     * @notice Burn the user tokens when they withdraw from a vault.
-     * @param _from  The address of the user to burn tokens from.
-     * @param _amount  The amount of tokens to burn.
+     * @notice 当用户从金库中取出资金时，燃烧用户的代币。
+     * @param _from 要燃烧代币的用户地址。
+     * @param _amount 要燃烧的代币数量。
      */
     function burn(
         address _from,
@@ -87,10 +87,10 @@ contract RebaseToken is ERC20, Ownable, AccessControl {
     }
 
     /**
-     * @notice Calculates the balance of a user including accrued interest.
-     * principle balance + accrued interest
-     * @param _user  The address of the user to calculate the balance for.
-     * @return The balance of the user including accrued interest.
+     * @notice 计算用户的余额，包括累计的利息。
+     * 本金余额 + 累计利息
+     * @param _user 要计算余额的用户地址。
+     * @return 包括累计利息在内的用户余额。
      */
     function balanceOf(address _user) public view override returns (uint256) {
         return
@@ -100,10 +100,10 @@ contract RebaseToken is ERC20, Ownable, AccessControl {
     }
 
     /**
-     * @notice Transfer tokens from one address to another.
-     * @param _recipient The address of the recipient.
-     * @param _amount  The amount of tokens to transfer.
-     * @return True if the transfer was successful, false otherwise.
+     * @notice 从一个地址向另一个地址转账。
+     * @param _recipient 接收者的地址。
+     * @param _amount 要转账的代币数量。
+     * @return 如果转账成功则返回true，否则返回false。
      */
     function transfer(
         address _recipient,
@@ -121,11 +121,14 @@ contract RebaseToken is ERC20, Ownable, AccessControl {
     }
 
     /**
-     * @notice Transfer tokens from one address to another.
-     * @param _sender  The user to transfer the tokens from.
-     * @param _recipient The user to transfer the tokens to.
-     * @param _amount The amount of tokens to transfer.
-     * @return True if the transfer was successful, false otherwise.
+     * @notice 从一个地址向另一个地址转账。
+     * @param _sender 要转账的代币来源地址。
+     * @param _recipient 要转账的代币接收地址。
+     * @param _amount 要转账的代币数量。
+     * @return 如果转账成功则返回true，否则返回false。
+     * 可以在代码部署早期存入少量token来获取高的利率，之后再将大量的token存入该地址获得同样的利率而不会随着时间衰减。
+     * 还可以创建多个高利率的账户，通过将多个账户的token存入该地址来获得更高的利率。
+     * 这是代码本身设计的时候产生的缺陷问题。
      */
     function transferFrom(
         address _sender,
@@ -167,32 +170,32 @@ contract RebaseToken is ERC20, Ownable, AccessControl {
     }
 
     /**
-     * @notice Calculates the accrued interest for a user and mints the tokens to them.
-     * @param _user The address of the user to calculate the accrued interest for.
+     * @notice 计算用户的累计利息并向用户铸造代币。
+     * @param _user 要计算累计利息的用户地址。
      */
     function _mintAccruedInterest(address _user) private {
-        // find their current balance of rebase tokens that have been minted to the user -> principal
+        // 找到目前已被铸造给用户的复利代币余额 -> 本金
         uint256 previousPrincipalBalance = super.balanceOf(_user);
-        // calculate their current balance of rebase tokens -> balanceof
+        // 计算用户的当前复利代币余额 -> balanceof
         uint256 currentBalance = balanceOf(_user);
-        // calculate the number of tokens that need to be minted to the user -> accruedInterest
+        // 计算需要向用户铸造的代币数量 -> 累计利息
         uint256 balanceIncrease = currentBalance - previousPrincipalBalance;
-        // mint the accruedInterest to the user
+        // 向用户铸造累计利息
         s_userlastUpdatedTimestamp[_user] = block.timestamp;
         _mint(_user, balanceIncrease);
     }
 
     /**
-     * @notice Get the interest rate of the token currently set for the contract.
-     * @return The interest rate of the token.
+     * @notice 获取合约中当前设置的代币利率。
+     * @return 代币的利率。
      */
     function getInterestRate() external view returns (uint256) {
         return s_interestRate;
     }
 
     /**
-     * @notice Get the interest rate for a user.
-     * @param _user The address of the user.
+     * @notice 获取用户的利率。
+     * @param _user 用户地址。
      */
     function getUserInterestRate(
         address _user

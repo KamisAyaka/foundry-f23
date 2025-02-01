@@ -10,6 +10,10 @@ contract Vault {
     event Deposit(address indexed user, uint256 amount);
     event Redeem(address indexed user, uint256 amount);
 
+    /**
+     * @notice 构造函数，初始化 Vault 合约。
+     * @param _rebaseToken RebaseToken 合约地址。
+     */
     constructor(IRebaseToken _rebaseToken) {
         i_rebaseToken = _rebaseToken;
     }
@@ -17,25 +21,25 @@ contract Vault {
     receive() external payable {}
 
     /**
-     * @notice Deposit ETH into the vault and mint rebase tokens.
+     * @notice 存入 ETH 到金库并铸造复利代币。
      */
     function deposit() external payable {
-        // Deposit ETH into the vault
-        // Mint tokens to the user
-        // Emit a Deposit event
+        // 存入 ETH 到金库
+        // 铸造代币给用户
+        // 触发 Deposit 事件
         uint256 interestRate = i_rebaseToken.getInterestRate();
         i_rebaseToken.mint(msg.sender, msg.value, interestRate);
         emit Deposit(msg.sender, msg.value);
     }
 
     /**
-     * @notice Redeem rebase tokens for ETH.
-     * @param _amount The amount of tokens to redeem.
+     * @notice 用复利代币兑换 ETH。
+     * @param _amount 要兑换的代币数量。
      */
     function redeem(uint256 _amount) external {
-        // Burn tokens from the user
-        // Withdraw ETH from the vault
-        // Emit a Redeem event
+        // 燃烧用户的代币
+        // 从金库中提取 ETH
+        // 触发 Redeem 事件
         if (_amount == type(uint256).max) {
             _amount = i_rebaseToken.balanceOf(msg.sender);
         }
@@ -48,7 +52,7 @@ contract Vault {
     }
 
     /**
-     * @notice Returns the address of the rebase token used by the vault.
+     * @notice 返回金库使用的复利代币地址。
      */
     function getRebaseTokenAddress() external view returns (address) {
         return address(i_rebaseToken);

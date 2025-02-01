@@ -6,7 +6,7 @@ import {RebaseToken} from "../src/RebaseToken.sol";
 import {Vault} from "../src/Vault.sol";
 import {IRebaseToken} from "../src/interfaces/IRebaseToken.sol";
 import {Ownable} from "@openzeppelin/contracts/access/Ownable.sol";
-import {IAccessControl} from "@openzeppelin/contracts/access/AccessControl.sol";
+import {IAccessControl} from "@openzeppelin/contracts/access/IAccessControl.sol";
 
 contract RebaseTokenTest is Test {
     RebaseToken private rebaseToken;
@@ -108,9 +108,9 @@ contract RebaseTokenTest is Test {
         vault.deposit{value: amount}();
 
         address user2 = makeAddr("user2");
-        uint256 userBalanceTransfer = rebaseToken.balanceOf(user);
+        uint256 userBalanceBeforeTransfer = rebaseToken.balanceOf(user);
         uint256 user2BalanceBeforeTransfer = rebaseToken.balanceOf(user2);
-        assertEq(userBalanceTransfer, amount);
+        assertEq(userBalanceBeforeTransfer, amount);
         assertEq(user2BalanceBeforeTransfer, 0);
 
         vm.prank(owner);
@@ -120,7 +120,10 @@ contract RebaseTokenTest is Test {
         rebaseToken.transfer(user2, amountToSend);
         uint256 userBalanceAfterTransfer = rebaseToken.balanceOf(user);
         uint256 user2BalanceAfterTransfer = rebaseToken.balanceOf(user2);
-        assertEq(userBalanceAfterTransfer, userBalanceTransfer - amountToSend);
+        assertEq(
+            userBalanceAfterTransfer,
+            userBalanceBeforeTransfer - amountToSend
+        );
         assertEq(user2BalanceAfterTransfer, amountToSend);
 
         assertEq(rebaseToken.getUserInterestRate(user), 5e10);

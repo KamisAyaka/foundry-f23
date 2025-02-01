@@ -7,6 +7,7 @@ import {RateLimiter} from "@ccip/contracts/src/v0.8/ccip/libraries/RateLimiter.s
 
 contract ConfigurePoolScript is Script {
     function run(
+        address owner,
         address localPool,
         uint64 remoteChainSelector,
         address remotePool,
@@ -18,7 +19,7 @@ contract ConfigurePoolScript is Script {
         uint128 inboundRateLimiterCapacity,
         uint128 inboundRateLimiterRate
     ) public {
-        vm.startBroadcast();
+        vm.startBroadcast(owner);
         bytes[] memory remotePoolAddresses = new bytes[](1);
         remotePoolAddresses[0] = abi.encode(remotePool);
         TokenPool.ChainUpdate[]
