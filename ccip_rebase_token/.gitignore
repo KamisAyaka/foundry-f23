@@ -1,7 +1,7 @@
 # Compiler files
 cache/
 out/
-lib/ccip/
+lib/
 # Ignores development broadcast logs
 !/broadcast
 /broadcast/*/31337/
