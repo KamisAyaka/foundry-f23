@@ -73,3 +73,12 @@
 [submodule "1-horse-store/lib/forge-std"]
 	path = 1-horse-store/lib/forge-std
 	url = https://github.com/foundry-rs/forge-std
+[submodule "1-horse-store/lib/foundry-huff"]
+	path = 1-horse-store/lib/foundry-huff
+	url = https://github.com/huff-language/foundry-huff
+[submodule "1-horse-store/lib/openzeppelin-contracts"]
+	path = 1-horse-store/lib/openzeppelin-contracts
+	url = https://github.com/openzeppelin/openzeppelin-contracts
+[submodule "1-horse-store/lib/huffmate"]
+	path = 1-horse-store/lib/huffmate
+	url = https://github.com/huff-language/huffmate
