@@ -1,0 +1,79 @@
+// send calldata -> function dispatch -> function
+// 60 00 80 60 09 3d 39 3d f3 -> Contract Creation ByteCode
+// 60018060093d393df3 5f(push0)
+// 0x39 合约创建部分
+// “Hey, take the binary after me, and stick it on-chain”
+
+// 在这段代码中，0x39（CODECOPY）用于将合约的创建时字节码（creation bytecode）的一部分复制到内存中。具体来说：
+
+// 60 00: 将值 0 推入栈中，作为目标内存偏移量。
+// 80: 复制栈顶元素（即 0），以便后续使用。
+// 60 09: 将值 9 推入栈中，作为合约代码的偏移量。
+// 3d: 获取当前执行上下文的代码长度，并将其推入栈中。
+// 39: 执行 CODECOPY，将合约代码从偏移量 9 开始的 codeLength 字节复制到内存偏移量 0。
+// 3d: 再次获取代码长度。
+// f3: 执行 RETURN 操作码，返回已复制到内存中的代码，完成合约部署。
+
+#define function updateHorseNumber(uint256) nonpayable returns()
+#define function readNumberOfHorses() view returns(uint256)
+
+#define constant NUMBER_OF_HORSES_STORAGE_SLOT = FREE_STORAGE_POINTER() //指向空闲存储位置 0x0
+
+#define macro MAIN() = takes (0) returns (0) {
+    0x00        // PUSH0 0x00 [0]
+    // 0x02        // PUSH2 0x02 TOP [2, 0] BOTTOM
+    calldataload    //[calldata]
+    // 64 / 2 = 32 bytes ->right
+    // 32 - 4 = 28 bytes * 8 = 224 bits = 0xe0
+    0xe0        // [0xe0,calldata(32)]
+    shr         // [function_selector]
+
+    //0xcdfead2e == update
+    //0xe026c017 == read
+
+    // updateHorseNumber selector
+    dup1        // [function_selector,function_selector]
+    //0xcdfead2e  // [0xcdfead2e,function_selector,function_selector]
+    __FUNC_SIG(updateHorseNumber)
+    eq          // [true_is_func_selector_matches,function_selector]
+    // jump to updateHorseNumber code if true
+    updateJump   // [updateHorsenumberProgramCounter,true/false,function_selector]
+    jumpi        // [function_selector]
+
+
+    // readNumberofHorse selector 0xe026c017
+    //0xe026c017  // [0xe026c017,function_selector]
+    __FUNC_SIG(readNumberOfHorses)
+    eq          // [true_is_func_selector_matches]
+    readJump     // [readJump,true_is_func_selector_matches]
+    jumpi        // []
+
+    0x00 0x00 revert //[]
+
+    updateJump:
+        SET_NUMBER_OF_HORESS()
+    readJump:
+        GET_NUMBER_OF_HORESS()
+}
+
+#define macro SET_NUMBER_OF_HORESS() = takes(0) returns(0){
+    // 1. Get the value to store from calldata
+    0x04          // PUSH4 0x04 [4]
+    calldataload  // [input value]
+    // 2. Give it a storage slot
+    [NUMBER_OF_HORSES_STORAGE_SLOT]   // [storage_slot,input value] 指针索引key
+    // 3. sstore opcode stores the value at the storage slot
+    sstore        // []
+    stop
+}
+
+#define macro GET_NUMBER_OF_HORESS() = takes(0) returns(0){
+    // 1. Get the storage slot
+    [NUMBER_OF_HORSES_STORAGE_SLOT]   // [storage_slot]
+    // 2. sload opcode loads the value at the storage slot into memory
+    sload         // [value]
+    0x00          // [0,value]
+    mstore        // []  // Memory: [value]
+    // 3. Return the value
+    0x20 0x00 return        // []
+}
